@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus BG - Background Remover</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --border-radius: 12px;
+            
+            /* Theme variables */
+            --bg-color: #f3f4f6;
+            --card-bg: white;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+        
+        /* Dark mode variables */
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --card-bg: #1f2937;
+            --text-color: #f9fafb;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--gray);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .upload-container {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .theme-toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle-btn:hover {
+            background-color: rgba(107, 114, 128, 0.1);
+        }
+
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: var(--border-radius);
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .upload-area.dragging {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.1);
+            transform: scale(0.99);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .result-container {
+            display: none;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .image-comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .image-card {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-card-title {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .download-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .download-btn:hover {
+            background-color: #0ca678;
+            transform: translateY(-2px);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            display: none;
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        footer {
+            background-color: white;
+            padding: 2rem;
+            text-align: center;
+            color: var(--gray);
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 3rem 0;
+            justify-content: center;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 300px;
+            flex: 1;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            background: rgba(79, 70, 229, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-text {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .image-comparison {
+                flex-direction: column;
+            }
+            
+            .image-card {
+                min-width: 100%;
+            }
+        }
+
+        /* Animated Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateX(120%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        .notification-message {
+            font-weight: 500;
+        }
+
+        /* Image Preview */
+        .preview-container {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-crop-alt"></i></div>
+            <span>Nexus BG</span>
+        </div>
+        <div class="theme-toggle">
+            <button id="themeToggle" class="theme-toggle-btn">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Remove Image Backgrounds Instantly</h1>
+            <p>Transform your photos with our powerful AI-powered background removal tool. Get perfect cutouts in seconds with no effort.</p>
+        </section>
+
+        <section class="upload-container">
+            <h2>Upload Your Image</h2>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" class="file-input" id="fileInput" accept="image/*">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">
+                    <strong>Click to upload</strong> or drag and drop
+                </div>
+                <p>PNG, JPG or JPEG (max. 5MB)</p>
+                <button class="upload-btn">
+                    <i class="fas fa-image"></i> Choose Image
+                </button>
+            </div>
+            <div class="preview-container" id="previewContainer">
+                <img class="preview-image" id="previewImage" alt="Preview">
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </section>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Removing background... Please wait</p>
+        </div>
+
+        <section class="result-container" id="resultContainer">
+            <h2 class="result-title">Background Removed Successfully!</h2>
+            <div class="image-comparison">
+                <div class="image-card">
+                    <img id="originalImage" alt="Original Image">
+                    <div class="image-card-title">Original Image</div>
+                </div>
+                <div class="image-card">
+                    <img id="processedImage" alt="Processed Image">
+                    <div class="image-card-title">Background Removed</div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="download-btn" id="downloadBtn">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="upload-btn" id="newImageBtn">
+                    <i class="fas fa-plus"></i> Process New Image
+                </button>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">Fast Processing</h3>
+                <p class="feature-text">Get your images processed in seconds with our high-performance AI algorithm.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <h3 class="feature-title">Perfect Results</h3>
+                <p class="feature-text">Advanced AI technology ensures precise cutouts even with complex backgrounds.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 class="feature-title">Secure Processing</h3>
+                <p class="feature-text">Your images are processed securely and never stored on our servers.</p>
+            </div>
+        </section>
+    </main>
+
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-message" id="notificationMessage"></div>
+    </div>
+
+    <footer style="background-color: var(--card-bg); border-top: 1px solid var(--border-color);">
+        <p>&copy; 2025 Nexus BG. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme management
+            const themeToggle = document.getElementById('themeToggle');
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            
+            // Check for saved theme or use system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
+                document.body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.body.setAttribute('data-theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            
+            // Toggle theme
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.body.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                } else {
+                    document.body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+            });
+            
+            // Constants
+            const API_KEY = '2NSNy8dd94mu7WxaWqKKX7Zo'; // Your Remove.bg API key
+            const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+            // DOM Elements
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const originalImage = document.getElementById('originalImage');
+            const processedImage = document.getElementById('processedImage');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const newImageBtn = document.getElementById('newImageBtn');
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notificationMessage');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImage = document.getElementById('previewImage');
+
+            // Event Listeners
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+            downloadBtn.addEventListener('click', handleDownload);
+            newImageBtn.addEventListener('click', resetForm);
+
+            // Handle drag over
+            function handleDragOver(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragging');
+            }
+
+            // Handle drag leave
+            function handleDragLeave(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragging');
+            }
+
+            // Handle drop
+            function handleDrop(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragging');
+                
+                if (e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files[0]);
+                }
+            }
+
+            // Handle file selection
+            function handleFileSelect(e) {
+                if (fileInput.files.length) {
+                    handleFiles(fileInput.files[0]);
+                }
+            }
+
+            // Handle files
+            function handleFiles(file) {
+                // Reset error message
+                hideError();
+                
+                // Check file type
+                if (!file.type.match('image.*')) {
+                    showError('Please select an image file (PNG, JPG or JPEG)');
+                    return;
+                }
+
+                // Check file size
+                if (file.size > MAX_FILE_SIZE) {
+                    showError('File size exceeds 5MB limit');
+                    return;
+                }
+
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    
+                    // Process image
+                    processImage(file);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Process image
+            function processImage(file) {
+                // Show loading
+                loading.style.display = 'block';
+
+                const formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto');
+
+                fetch('https://api.remove.bg/v1.0/removebg', {
+                    method: 'POST',
+                    headers: {
+                        'X-Api-Key': API_KEY
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // If response is not OK, try to get the error message from the API
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.errors[0].title || 'An error occurred');
+                        });
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Process successful
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Set original and processed images
+                    originalImage.src = previewImage.src;
+                    processedImage.src = url;
+                    
+                    // Hide loading and show result
+                    loading.style.display = 'none';
+                    resultContainer.style.display = 'block';
+                    
+                    // Show notification
+                    showNotification('Background removed successfully!');
+                })
+                .catch(error => {
+                    // Hide loading
+                    loading.style.display = 'none';
+                    
+                    // Show error message
+                    showError(`Error: ${error.message}`);
+                });
+            }
+
+            // Handle download
+            function handleDownload() {
+                // Get the image from the src
+                fetch(processedImage.src)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        // Create blob URL
+                        const blobUrl = URL.createObjectURL(blob);
+                        
+                        // Create a temporary link
+                        const link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = 'nexus-bg-removed.png';
+                        document.body.appendChild(link); // Required for Firefox
+                        link.click();
+                        
+                        // Clean up
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(blobUrl);
+                        }, 100);
+                        
+                        // Show notification
+                        showNotification('Image downloaded successfully!');
+                    })
+                    .catch(error => {
+                        console.error('Download error:', error);
+                        showError('Failed to download the image. Please try again.');
+                    });
+            }
+
+            // Reset form
+            function resetForm() {
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                resultContainer.style.display = 'none';
+                hideError();
+            }
+
+            // Show error message
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+
+            // Hide error message
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+
+            // Show notification
+            function showNotification(message) {
+                notificationMessage.textContent = message;
+                notification.classList.add('show');
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // Animation effects on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                    }
+                });
+            });
+
+            // Observe feature cards
+            document.querySelectorAll('.feature-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
